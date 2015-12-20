@@ -1,0 +1,46 @@
+#!/usr/bin/ansible-playbook
+---
+#
+#      Copyright (c) 2015 World Wide Technology, Inc.
+#      All rights reserved.
+#
+#      author: Joel W. King, World Wide Technology
+#
+#
+- name:  Sample playbook to illustrate Ansible, Spark and APIC-EM integration
+  hosts:  APIC_EM
+  connection: local
+  gather_facts: no
+
+  vars:
+   spark_room: Router_upgrade
+
+  tasks:
+  - name: Decrypt the password file
+    include_vars: "./passwords.yml"
+
+  - name: Use APIC-EM controller to return a list of discovered devices
+    apic_em_gather_facts:
+     host: 10.255.40.125
+     username: admin
+     password: "{{password}}"
+
+  - name: Create and Add members to a room
+    spark_room:
+      room: "{{spark_room}}"
+      members: "{{item}}"
+      token: "{{spark_token}}"
+    with_items:
+       - joel.king@wwt.com
+       - joe.user@example.net
+
+
+  - name: Send message to spark room
+    spark_room:
+      text: "Please upgrade {{item.hostname}} {{item.managementIpAddress}} {{item.serialNumber}} {{item.snmpLocation}} "
+      room: "{{spark_room}}"
+      token: "{{spark_token}}"
+    with_items: network_device
+    when:  item.softwareVersion == '15.3(3)M5' and item.platformId == 'CISCO2911/K9'
+
+

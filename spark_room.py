@@ -7,6 +7,7 @@
      16 December 2015  |  1.0 - initial release
      19 December 2015  |  1.1 - refacted code to handle errors
      20 December 2015  |  1.2 - Tested and run pylint
+     21 December 2015  |  1.3 - corrections to documentation
 
 """
 
@@ -14,8 +15,8 @@ DOCUMENTATION = '''
 ---
 module: 
 author: Joel W. King, World Wide Technology
-version_added: "1.2"
-short_description: Create Spark rooms, adding users and post messages.
+version_added: "1.3"
+short_description: Create Spark rooms, add users, post messages and files.
 description:
     - Cisco Spark is a cloud service providing persistent room-based chat and collaboration. This module uses the REST API to 
     - automate creating rooms, adding users to rooms, and sending text message and files to the room.
@@ -37,14 +38,14 @@ options:
             - Text message to send to the room
         required: false
 
-    file:
+    filename:
         description:
-            - File to post to the room
+            - File, a URI to post to the room
         required: false
 
     members:
         description:
-            - email address of a registered member to add to the room
+            - Email address of a registered member to add to the room
         required: false
 
     debug:
@@ -63,6 +64,7 @@ EXAMPLES = '''
 
 
      ansible localhost -m spark_room -a 'members=joe.user@wwt.com "text="this is a posting from Ansible" room=foobar token="redacted"' 
+
 
      - name: Add members to a room
        spark_room:
@@ -219,8 +221,13 @@ class Connection(object):
             self.code = self.code + rc 
             return None
 
+
+
+# ---------------------------------------------------------------------------
+# MAIN
+# ---------------------------------------------------------------------------
 def main():
-    "main"
+    "Create Spark rooms, add users and post messages"
     module = AnsibleModule(
         argument_spec=dict(
             room=dict(required=True),
